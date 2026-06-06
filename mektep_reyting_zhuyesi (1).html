@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduRating KZ — Педагог рейтинг жүйесі</title>
+<style>
+  :root {
+    --bg: #f5f5f3;
+    --bg2: #eeede9;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text2: #6b6b68;
+    --text3: #9e9e9b;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --green: #0F6E56;
+    --green-bg: #E1F5EE;
+    --green-text: #085041;
+    --amber-bg: #FAEEDA;
+    --amber-text: #633806;
+    --red-bg: #FCEBEB;
+    --red-text: #791F1F;
+    --gray-bg: #F1EFE8;
+    --gray-text: #444441;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  
+  input, select, textarea, button { font-family: inherit; font-size: 13px; }
+  input[type=text], input[type=number], input[type=password], input[type=email], select, textarea {
+    width: 100%; padding: 8px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--card); color: var(--text); outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,95,165,0.12); }
+  textarea { resize: vertical; min-height: 70px; }
+  button { cursor: pointer; }
+
+  .screen { display: none; }
+  .screen.on { display: block; }
+
+  /* LOGIN */
+  .login-outer { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 1rem; }
+  .login-box { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 380px; box-shadow: 0 2px 24px rgba(0,0,0,0.07); }
+  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 1.75rem; }
+  .logo-sq { width: 38px; height: 38px; background: var(--blue); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+  .logo-name { font-size: 16px; font-weight: 600; }
+  .logo-name span { display: block; font-size: 11px; font-weight: 400; color: var(--text2); }
+  .login-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .login-sub { font-size: 12px; color: var(--text2); margin-bottom: 1.25rem; }
+  .role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1.25rem; }
+  .role-btn { padding: 9px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: none; color: var(--text2); font-size: 12px; transition: all 0.15s; }
+  .role-btn.sel { background: var(--blue-bg); border-color: var(--blue); color: var(--blue-text); font-weight: 600; }
+  .fl { margin-bottom: 1rem; }
+  .fl label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
+  .btn-primary { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: var(--radius); padding: 11px; font-size: 14px; font-weight: 600; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--blue-text); }
+  .err { color: #c0392b; font-size: 12px; margin-top: 8px; display: none; }
+  .demo-hint { margin-top: 12px; font-size: 11px; color: var(--text3); text-align: center; line-height: 1.6; }
+
+  /* APP SHELL */
+  .app-shell { display: grid; grid-template-columns: 210px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--card); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; }
+  .sb-head { padding: 1rem; border-bottom: 0.5px solid var(--border); }
+  .sb-logo { display: flex; align-items: center; gap: 8px; }
+  .sb-logo-sq { width: 30px; height: 30px; background: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; flex-shrink: 0; }
+  .sb-brand { font-size: 13px; font-weight: 600; }
+  .sb-brand span { display: block; font-size: 11px; font-weight: 400; color: var(--text2); }
+  .sb-nav { padding: 6px 0; flex: 1; }
+  .nav-section { font-size: 10px; color: var(--text3); padding: 8px 14px 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 14px; font-size: 13px; color: var(--text2); border-left: 2px solid transparent; cursor: pointer; transition: all 0.12s; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.act { color: var(--blue); background: var(--blue-bg); border-left-color: var(--blue); font-weight: 600; }
+  .nav-item .ni { font-size: 16px; }
+  .sb-foot { padding: 10px 14px; border-top: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--blue-bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--blue-text); flex-shrink: 0; }
+  .u-name { font-size: 12px; font-weight: 600; }
+  .u-role { font-size: 11px; color: var(--text2); }
+  .logout { margin-left: auto; background: none; border: none; color: var(--text3); font-size: 16px; padding: 2px; }
+  .logout:hover { color: #c0392b; }
+
+  /* MAIN */
+  .main { padding: 1.5rem; overflow-y: auto; }
+  .page { display: none; }
+  .page.on { display: block; }
+  .page-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .hd-btns { display: flex; gap: 8px; flex-shrink: 0; }
+
+  /* CARDS */
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 1rem; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: none; color: var(--text); font-size: 12px; font-weight: 500; transition: all 0.12s; }
+  .btn:hover { background: var(--bg2); }
+  .btn.blue { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn.blue:hover { background: var(--blue-text); }
+  .btn.green { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn.green:hover { background: var(--green-text); }
+  .btn.sm { padding: 6px 10px; font-size: 11px; }
+  .btn.danger { color: #c0392b; border-color: #f5a6a6; }
+  .btn.danger:hover { background: var(--red-bg); }
+
+  /* STATS */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .stat { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+  .stat-label { font-size: 11px; color: var(--text2); font-weight: 500; margin-bottom: 6px; }
+  .stat-val { font-size: 26px; font-weight: 700; }
+  .stat-hint { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .stat-hint.up { color: var(--green); }
+  .stat-hint.warn { color: #b7860b; }
+
+  /* TABLE */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; color: var(--text2); font-weight: 600; padding: 7px 10px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 10px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  /* BADGES */
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+  .b-high { background: var(--green-bg); color: var(--green-text); }
+  .b-mid { background: var(--blue-bg); color: var(--blue-text); }
+  .b-dev { background: var(--amber-bg); color: var(--amber-text); }
+  .b-low { background: var(--red-bg); color: var(--red-text); }
+  .b-pend { background: var(--gray-bg); color: var(--gray-text); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.g1 { grid-template-columns: 1fr; }
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fg label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .fg .hint { font-size: 11px; color: var(--text3); font-weight: 400; }
+  .section-divider { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
+
+  /* TABS */
+  .tab-row { display: flex; gap: 0; border-bottom: 0.5px solid var(--border); margin-bottom: 1.25rem; }
+  .tab { padding: 9px 16px; font-size: 13px; font-weight: 500; border: none; background: none; color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.12s; }
+  .tab.act { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+  .tabpanel { display: none; }
+  .tabpanel.on { display: block; }
+
+  /* ACH ROWS */
+  .ach-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .ach-row { display: grid; gap: 8px; align-items: end; padding: 10px 12px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); }
+  .ach-row.t4 { grid-template-columns: 1fr 1fr 80px 28px; }
+  .ach-row.s5 { grid-template-columns: 1fr 1fr 70px 70px 28px; }
+  .ach-row .fg label { font-size: 11px; }
+  .ach-row input, .ach-row select { font-size: 12px; }
+  .rm-btn { background: none; border: none; color: var(--text3); font-size: 18px; line-height: 1; padding: 0; cursor: pointer; align-self: center; }
+  .rm-btn:hover { color: #c0392b; }
+  .add-row { display: flex; align-items: center; gap: 6px; width: 100%; padding: 8px 12px; background: none; border: 0.5px dashed var(--border2); border-radius: var(--radius); color: var(--blue); font-size: 12px; font-weight: 500; transition: all 0.12s; margin-top: 4px; }
+  .add-row:hover { background: var(--blue-bg); }
+
+  /* INTEGRITY */
+  .integrity-box { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 1.25rem; }
+  .integrity-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 7px; color: var(--blue-text); }
+  .check-row { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 8px; font-size: 12px; line-height: 1.6; cursor: pointer; }
+  .check-row input[type=checkbox] { width: auto; flex-shrink: 0; margin-top: 3px; }
+
+  /* RATING BAR */
+  .rbar-wrap { display: flex; align-items: center; gap: 8px; }
+  .rbar { flex: 1; height: 7px; background: var(--bg2); border-radius: 4px; overflow: hidden; min-width: 60px; }
+  .rbar-fill { height: 100%; border-radius: 4px; }
+
+  /* MATRIX */
+  .matrix-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .mx { padding: 8px 4px; border-radius: var(--radius); text-align: center; font-size: 11px; font-weight: 600; }
+  .mx.hd { background: var(--bg2); color: var(--text2); font-size: 10px; font-weight: 500; }
+  .mx.mj { background: var(--green-bg); color: var(--green-text); }
+  .mx.mt { background: var(--blue-bg); color: var(--blue-text); }
+  .mx.md { background: var(--amber-bg); color: var(--amber-text); }
+  .mx.ml { background: var(--red-bg); color: var(--red-text); }
+
+  /* ALERT */
+  .alert { display: flex; gap: 8px; align-items: flex-start; padding: 10px 14px; border-radius: var(--radius); font-size: 12px; margin-bottom: 1rem; }
+  .alert.info { background: var(--blue-bg); color: var(--blue-text); }
+  .alert.success { background: var(--green-bg); color: var(--green-text); display: none; }
+  .alert i { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.on { display: flex; }
+  .modal { background: var(--card); border-radius: var(--radius-lg); padding: 1.5rem; width: 100%; max-width: 480px; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+  .modal-close { background: none; border: none; font-size: 20px; color: var(--text2); cursor: pointer; }
+
+  /* PROFILE MODAL */
+  .profile-header { display: flex; align-items: center; gap: 14px; margin-bottom: 1.25rem; }
+  .profile-av { width: 52px; height: 52px; border-radius: 50%; background: var(--blue-bg); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--blue-text); flex-shrink: 0; }
+  .profile-name { font-size: 16px; font-weight: 700; }
+  .profile-subj { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .kv-table { width: 100%; font-size: 13px; }
+  .kv-table td { padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+  .kv-table tr:last-child td { border-bottom: none; }
+  .kv-table td:first-child { color: var(--text2); width: 50%; }
+  .kv-table td:last-child { font-weight: 600; }
+
+  /* LEVEL METER */
+  .level-meters { margin: 1rem 0; }
+  .lm-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .lm-label { font-size: 12px; color: var(--text2); width: 170px; flex-shrink: 0; }
+  .lm-bar { flex: 1; height: 7px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+  .lm-fill { height: 100%; border-radius: 4px; background: var(--blue); }
+  .lm-val { font-size: 12px; font-weight: 600; width: 36px; text-align: right; }
+
+  /* SETTINGS */
+  .settings-section { margin-bottom: 1.5rem; }
+  .settings-title { font-size: 14px; font-weight: 600; margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+
+  /* USERS TABLE */
+  .user-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .user-row:last-child { border-bottom: none; }
+  .u-av2 { width: 34px; height: 34px; border-radius: 50%; background: var(--blue-bg); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--blue-text); flex-shrink: 0; }
+  .u-info { flex: 1; }
+  .u-info .name { font-size: 13px; font-weight: 600; }
+  .u-info .meta { font-size: 11px; color: var(--text2); }
+
+  /* PRINT */
+  @media print {
+    .sidebar, .page-hd .hd-btns { display: none !important; }
+    .app-shell { grid-template-columns: 1fr; }
+    .main { padding: 0; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen on" id="scr-login">
+<div class="login-outer">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-sq">🏫</div>
+      <div class="logo-name">EduRating KZ<span>Педагог рейтинг жүйесі</span></div>
+    </div>
+    <div class="login-title">Жүйеге кіру</div>
+    <div class="login-sub">Рөліңізді таңдаңыз</div>
+    <div class="role-row">
+      <button class="role-btn sel" onclick="setRole('admin',this)">🛡 Әкімші</button>
+      <button class="role-btn" onclick="setRole('teacher',this)">👤 Мұғалім</button>
+    </div>
+    <div class="fl"><label>Логин (email)</label><input type="email" id="li-u" value="admin@mektep.kz"></div>
+    <div class="fl"><label>Құпиясөз</label><input type="password" id="li-p" value="Admin2025!" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="err" id="li-err">⚠️ Логин немесе құпиясөз қате</div>
+    <button class="btn-primary" onclick="doLogin()">Кіру →</button>
+    <div class="demo-hint">
+      Демо кіру:<br>
+      Әкімші: <b>admin@mektep.kz</b> / <b>Admin2025!</b><br>
+      Мұғалім: <b>teacher@mektep.kz</b> / <b>Teacher2025!</b>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="scr-app">
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">
+        <div class="sb-logo-sq">🏫</div>
+        <div class="sb-brand">EduRating<span id="sb-school">№1 Мектеп</span></div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="nav-section">Негізгі</div>
+      <div class="nav-item act" onclick="nav('pg-dash',this)" id="ni-dash">
+        <span class="ni">🏠</span> Басты бет
+      </div>
+      <div class="nav-item" onclick="nav('pg-teachers',this)" id="ni-teachers">
+        <span class="ni">👥</span> Мұғалімдер
+      </div>
+      <div class="nav-item" onclick="nav('pg-enter',this)" id="ni-enter">
+        <span class="ni">✏️</span> Деректер енгізу
+      </div>
+      <div class="nav-item" onclick="nav('pg-rating',this)" id="ni-rating">
+        <span class="ni">📊</span> Рейтинг
+      </div>
+      <div class="nav-section" id="adm-sect">Әкімші</div>
+      <div class="nav-item" onclick="nav('pg-users',this)" id="ni-users">
+        <span class="ni">🔑</span> Пайдаланушылар
+      </div>
+      <div class="nav-item" onclick="nav('pg-settings',this)" id="ni-settings">
+        <span class="ni">⚙️</span> Баптаулар
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="avatar" id="sb-av">А</div>
+      <div>
+        <div class="u-name" id="sb-name">Әкімші</div>
+        <div class="u-role" id="sb-role">Директор</div>
+      </div>
+      <button class="logout" onclick="doLogout()" title="Шығу">⏻</button>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page on" id="pg-dash">
+      <div class="page-hd">
+        <div>
+          <div class="page-title">Басты бет</div>
+          <div class="page-sub" id="dash-sub">2024–2025 оқу жылы</div>
+        </div>
+        <div class="hd-btns">
+          <button class="btn blue" onclick="nav('pg-enter',document.getElementById('ni-enter'))">+ Деректер енгізу</button>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-label">Барлық мұғалім</div><div class="stat-val" id="st-total">—</div><div class="stat-hint">Тізімде</div></div>
+        <div class="stat"><div class="stat-label">Деректер толтырған</div><div class="stat-val" id="st-filled">—</div><div class="stat-hint warn" id="st-pending-hint">Күтілуде</div></div>
+        <div class="stat"><div class="stat-label">Жоғары тиімді (Ж)</div><div class="stat-val" id="st-high">—</div><div class="stat-hint up">Ж деңгейі</div></div>
+        <div class="stat"><div class="stat-label">Орт. рейтинг балы</div><div class="stat-val" id="st-avg">—</div><div class="stat-hint up" id="st-avg-hint">есептелді</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <div class="card">
+          <div class="card-title">Соңғы жазбалар</div>
+          <div class="tbl-wrap"><table><thead><tr><th>Мұғалім</th><th>Пән</th><th>Деңгей</th><th>Балл</th></tr></thead>
+          <tbody id="recent-tb"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Тиімділік матрицасы</div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Жеке × Ұжымдық нәтижесі</div>
+          <div class="matrix-grid">
+            <div class="mx hd">Ұж \ Жеке</div><div class="mx hd">Жоғары</div><div class="mx hd">Тиімді</div><div class="mx hd">Дамушы</div><div class="mx hd">ДТ</div>
+            <div class="mx hd">Жоғары</div><div class="mx mj">Ж</div><div class="mx mj">Ж</div><div class="mx mt">Т</div><div class="mx md">Д</div>
+            <div class="mx hd">Тиімді</div><div class="mx mj">Ж</div><div class="mx mt">Т</div><div class="mx mt">Т</div><div class="mx md">Д</div>
+            <div class="mx hd">Дамушы</div><div class="mx mt">Т</div><div class="mx mt">Т</div><div class="mx md">Д</div><div class="mx ml">ДТ</div>
+            <div class="mx hd">ДТ</div><div class="mx md">Д</div><div class="mx md">Д</div><div class="mx ml">ДТ</div><div class="mx ml">ДТ</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <span class="badge b-high">Ж — Жоғары тиімді</span>
+            <span class="badge b-mid">Т — Тиімді</span>
+            <span class="badge b-dev">Д — Дамушы</span>
+            <span class="badge b-low">ДТ — Төмен</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHERS -->
+    <div class="page" id="pg-teachers">
+      <div class="page-hd">
+        <div>
+          <div class="page-title">Мұғалімдер тізімі</div>
+          <div class="page-sub">Педагогтер және деректер толтыру күйі</div>
+        </div>
+        <div class="hd-btns" id="add-teacher-btn-wrap">
+          <button class="btn blue" onclick="openAddTeacher()">+ Мұғалім қосу</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Мұғалім</th><th>Пән</th><th>Санат</th><th>Өтіл</th><th>Деректер</th><th>Балл</th><th>Деңгей</th><th></th></tr></thead>
+            <tbody id="teachers-tb"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA ENTRY -->
+    <div class="page" id="pg-enter">
+      <div class="page-hd">
+        <div>
+          <div class="page-title" id="enter-title">Деректер енгізу</div>
+          <div class="page-sub">Педагог жетістіктерін толтырыңыз</div>
+        </div>
+      </div>
+      <div class="alert info">ℹ️ <span>Тек расталған деректерді енгізіңіз. Деректерді бұрмалау анықталған жағдайда рейтинг жарамсыз болады.</span></div>
+      <div class="alert success" id="save-ok">✅ <span>Деректер сақталды! Рейтинг балы есептелді.</span></div>
+
+      <div class="card" style="margin-bottom:0.5rem;">
+        <div class="form-grid">
+          <div class="fg"><label>Мұғалімді таңдаңыз <span style="color:#c0392b">*</span></label><select id="sel-t"></select></div>
+          <div class="fg"><label>Оқу жылы</label><select id="sel-yr"><option>2024–2025</option><option>2023–2024</option></select></div>
+        </div>
+      </div>
+
+      <div class="tab-row">
+        <button class="tab act" onclick="switchTab('tb-basic',this)">Негізгі</button>
+        <button class="tab" onclick="switchTab('tb-teach',this)">Педагог жетістіктері</button>
+        <button class="tab" onclick="switchTab('tb-stud',this)">Оқушылар</button>
+        <button class="tab" onclick="switchTab('tb-qual',this)">Білім сапасы</button>
+      </div>
+
+      <div id="tb-basic" class="tabpanel on card">
+        <div class="card-title">Негізгі мәліметтер</div>
+        <div class="form-grid">
+          <div class="fg"><label>Біліктілікті арттыру сағаты (соңғы 5 жыл)</label><input type="number" id="cpd" placeholder="0" min="0"></div>
+          <div class="fg"><label>Жарияланған мақалалар</label><input type="number" id="art" placeholder="0" min="0"></div>
+          <div class="fg"><label>Ашық сабақтар</label><input type="number" id="opls" placeholder="0" min="0"></div>
+          <div class="fg"><label>Тренер / Ментор рөлі</label>
+            <select id="mentor">
+              <option value="0">Жоқ</option>
+              <option value="1">Мектеп деңгейінде</option>
+              <option value="2">Аудан / облыс деңгейінде</option>
+              <option value="3">Республикалық деңгейде</option>
+            </select>
+          </div>
+          <div class="fg"><label>Авторлық бағдарлама / оқулық</label>
+            <select id="author">
+              <option value="0">Жоқ</option>
+              <option value="1">Авторлық бағдарлама бар</option>
+              <option value="2">Авторлық оқулық / жинақ</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="tb-teach" class="tabpanel card">
+        <div class="card-title">Педагогтің конкурстары (соңғы 5 жыл) — Kp коэффициенті</div>
+        <div class="ach-list" id="t-ach-list">
+          <div class="ach-row t4">
+            <div class="fg"><label>Конкурс / іс-шара атауы</label><input type="text" placeholder="Атауы"></div>
+            <div class="fg"><label>Деңгей (коэффициент)</label>
+              <select>
+                <option value="0.1">Мектеп деңгейі (0.1)</option>
+                <option value="0.3">Аудан / қала (0.3)</option>
+                <option value="0.6">Облыс (0.6)</option>
+                <option value="0.9">Республикалық (0.9)</option>
+                <option value="1.0">Халықаралық (1.0)</option>
+              </select>
+            </div>
+            <div class="fg"><label>Жыл</label><input type="number" placeholder="2023" min="2020" max="2025"></div>
+            <button class="rm-btn" onclick="rmRow(this)">×</button>
+          </div>
+        </div>
+        <button class="add-row" onclick="addAch('t-ach-list','t')">+ Жетістік қосу</button>
+      </div>
+
+      <div id="tb-stud" class="tabpanel card">
+        <div class="card-title">Оқушылардың конкурстары (соңғы 5 жыл)</div>
+        <div class="ach-list" id="s-ach-list">
+          <div class="ach-row s5">
+            <div class="fg"><label>Конкурс / олимпиада атауы</label><input type="text" placeholder="Атауы"></div>
+            <div class="fg"><label>Деңгей</label>
+              <select>
+                <option value="0.1">Мектеп (0.1)</option>
+                <option value="0.3">Аудан / қала (0.3)</option>
+                <option value="0.6">Облыс (0.6)</option>
+                <option value="0.9">Республикалық (0.9)</option>
+                <option value="1.0">Халықаралық (1.0)</option>
+              </select>
+            </div>
+            <div class="fg"><label>Оқушы саны</label><input type="number" placeholder="1" min="1"></div>
+            <div class="fg"><label>Жыл</label><input type="number" placeholder="2023" min="2020" max="2025"></div>
+            <button class="rm-btn" onclick="rmRow(this)">×</button>
+          </div>
+        </div>
+        <button class="add-row" onclick="addAch('s-ach-list','s')">+ Жетістік қосу</button>
+        <hr class="section-divider">
+        <div class="card-title" style="margin-top:0;">Ұжымдық тиімділік</div>
+        <div class="form-grid">
+          <div class="fg"><label>Бітірушілер (жалпы саны)</label><input type="number" id="grad-t" placeholder="0" min="0"></div>
+          <div class="fg"><label>Мемлекеттік гранттан өткен</label><input type="number" id="grant-c" placeholder="0" min="0"></div>
+          <div class="fg"><label>"Алтын белгі" иегерлері</label><input type="number" id="gold-c" placeholder="0" min="0"></div>
+          <div class="fg"><label>Мемлекеттік аттестат</label>
+            <select id="attest">
+              <option value="0">Тиісті емес / жоқ</option>
+              <option value="1">Бірінші реттен өтті (1 балл)</option>
+              <option value="0.5">Қайталап өтті (0.5 балл)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="tb-qual" class="tabpanel card">
+        <div class="card-title">Білім сапасының 5 жылдық динамикасы (%)</div>
+        <div class="alert info" style="margin-bottom:1rem;">🔒 <span>Деректер тек электронды журналдан (Күнделік / Mektep) алынуы тиіс. Қолмен өзгертілген баллдар қабылданбайды.</span></div>
+        <div class="form-grid g1" style="grid-template-columns:repeat(5,1fr);gap:8px;" id="qual-grid">
+          <div class="fg"><label>2020–21 (%)</label><input type="number" placeholder="65" min="0" max="100" data-yr="2021"></div>
+          <div class="fg"><label>2021–22 (%)</label><input type="number" placeholder="68" min="0" max="100" data-yr="2022"></div>
+          <div class="fg"><label>2022–23 (%)</label><input type="number" placeholder="71" min="0" max="100" data-yr="2023"></div>
+          <div class="fg"><label>2023–24 (%)</label><input type="number" placeholder="74" min="0" max="100" data-yr="2024"></div>
+          <div class="fg"><label>2024–25 (%)</label><input type="number" placeholder="77" min="0" max="100" data-yr="2025"></div>
+        </div>
+        <div class="form-grid" style="margin-top:1rem;">
+          <div class="fg"><label>ҰБТ орташа балл <span class="hint">(бар болса)</span></label><input type="number" id="ubt" placeholder="0" min="0" max="140"></div>
+          <div class="fg"><label>PISA нәтижесі <span class="hint">(балл / деңгей)</span></label><input type="text" id="pisa" placeholder="Мысалы: 460"></div>
+        </div>
+      </div>
+
+      <div class="integrity-box">
+        <div class="integrity-title">🛡 Академиялық адалдық растауы</div>
+        <label class="check-row"><input type="checkbox" id="c1"> Барлық ұсынылған деректер шындыққа сай және растаушы құжаттармен дәлелденуі мүмкін.</label>
+        <label class="check-row"><input type="checkbox" id="c2"> Деректер бұрмаланған жағдайда рейтинг нәтижесі жарамсыз деп есептелетінін түсінемін.</label>
+        <label class="check-row"><input type="checkbox" id="c3"> Тексеру үшін электронды журнал мен барлық сертификат, дипломдарға қол жеткізуге рұқсат беремін.</label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:1rem;">
+        <button class="btn green" onclick="saveData()">💾 Сақтап, рейтинг есептеу</button>
+        <button class="btn" onclick="clearForm()">↺ Тазарту</button>
+      </div>
+    </div>
+
+    <!-- RATING -->
+    <div class="page" id="pg-rating">
+      <div class="page-hd">
+        <div>
+          <div class="page-title">Рейтинг нәтижелері</div>
+          <div class="page-sub">Педагогтер бойынша есептелген рейтинг балдары</div>
+        </div>
+        <div class="hd-btns">
+          <button class="btn" onclick="window.print()">🖨 Басып шығару</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Мұғалім</th><th>Пән</th><th>Санат</th><th>Рейтинг балы</th><th>Прогресс</th><th>Деңгей</th><th></th></tr></thead>
+            <tbody id="rating-tb"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="pg-users">
+      <div class="page-hd">
+        <div>
+          <div class="page-title">Пайдаланушылар</div>
+          <div class="page-sub">Жүйеге кіру рұқсаттары</div>
+        </div>
+        <div class="hd-btns" id="add-user-btn-wrap">
+          <button class="btn blue" onclick="openAddUser()">+ Пайдаланушы қосу</button>
+        </div>
+      </div>
+      <div class="card" id="users-card"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="pg-settings">
+      <div class="page-hd">
+        <div>
+          <div class="page-title">Баптаулар</div>
+          <div class="page-sub">Мектеп мәліметтері және жүйе параметрлері</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="settings-title">Мектеп туралы</div>
+        <div class="form-grid">
+          <div class="fg"><label>Мектеп атауы</label><input type="text" id="sch-name" value="№1 Жалпы орта мектеп"></div>
+          <div class="fg"><label>Аудан / Қала</label><input type="text" id="sch-city" value="Алматы қаласы"></div>
+          <div class="fg"><label>Директор ТАӘ</label><input type="text" id="sch-dir" value="Сейткали Бекзат Маратұлы"></div>
+          <div class="fg"><label>Ағымдағы оқу жылы</label><select><option>2024–2025</option><option>2025–2026</option></select></div>
+        </div>
+        <button class="btn green" style="margin-top:1rem;" onclick="saveSettings()">✓ Сақтау</button>
+      </div>
+      <div class="card">
+        <div class="settings-title">Деңгей шектері</div>
+        <div class="form-grid">
+          <div class="fg"><label>Жоғары тиімді (Ж) — минимум балл</label><input type="number" id="thr-high" value="80" min="0" max="100"></div>
+          <div class="fg"><label>Тиімді (Т) — минимум балл</label><input type="number" id="thr-mid" value="60" min="0" max="100"></div>
+          <div class="fg"><label>Дамушы (Д) — минимум балл</label><input type="number" id="thr-dev" value="40" min="0" max="100"></div>
+        </div>
+        <button class="btn green" style="margin-top:1rem;" onclick="saveSettings()">✓ Сақтау</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-add-teacher">
+<div class="modal">
+  <div class="modal-title">Жаңа мұғалім қосу <button class="modal-close" onclick="closeModal('modal-add-teacher')">×</button></div>
+  <div class="form-grid">
+    <div class="fg"><label>ТАӘ (толық) *</label><input type="text" id="nt-fio" placeholder="Тегі Аты Әкесінің аты"></div>
+    <div class="fg"><label>Пән *</label>
+      <select id="nt-subj">
+        <option>Математика</option><option>Қазақ тілі мен әдебиеті</option><option>Орыс тілі мен әдебиеті</option>
+        <option>Ағылшын тілі</option><option>Физика</option><option>Химия</option><option>Биология</option>
+        <option>География</option><option>Тарих</option><option>Информатика</option><option>Дене тәрбиесі</option>
+        <option>Музыка</option><option>Бастауыш сынып мұғалімі</option>
+      </select>
+    </div>
+    <div class="fg"><label>Санат</label>
+      <select id="nt-cat">
+        <option>Санатсыз</option><option>II санат</option><option>I санат</option><option>Жоғары санат</option>
+        <option>Педагог-сарапшы</option><option>Педагог-зерттеуші</option><option>Педагог-шебер</option>
+      </select>
+    </div>
+    <div class="fg"><label>Педагогикалық өтіл (жыл)</label><input type="number" id="nt-exp" placeholder="0" min="0"></div>
+    <div class="fg"><label>Email (логин)</label><input type="email" id="nt-email" placeholder="mugalim@mektep.kz"></div>
+    <div class="fg"><label>Алғашқы пароль</label><input type="text" id="nt-pass" placeholder="Автоматты жасалады" readonly></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:1.25rem;">
+    <button class="btn green" onclick="addTeacher()">✓ Сақтау</button>
+    <button class="btn" onclick="closeModal('modal-add-teacher')">Бас тарту</button>
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-add-user">
+<div class="modal">
+  <div class="modal-title">Пайдаланушы қосу <button class="modal-close" onclick="closeModal('modal-add-user')">×</button></div>
+  <div class="form-grid g1">
+    <div class="fg"><label>ТАӘ</label><input type="text" id="nu-fio" placeholder="Толық аты"></div>
+    <div class="fg"><label>Email (логин)</label><input type="email" id="nu-email" placeholder="user@mektep.kz"></div>
+    <div class="fg"><label>Рөлі</label><select id="nu-role"><option value="admin">Әкімші</option><option value="teacher">Мұғалім</option></select></div>
+    <div class="fg"><label>Пароль</label><input type="text" id="nu-pass" value="" placeholder="Кемінде 8 таңба"></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:1.25rem;">
+    <button class="btn green" onclick="addUser()">✓ Сақтау</button>
+    <button class="btn" onclick="closeModal('modal-add-user')">Бас тарту</button>
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-profile">
+<div class="modal">
+  <div class="modal-title">Мұғалім профилі <button class="modal-close" onclick="closeModal('modal-profile')">×</button></div>
+  <div id="profile-content"></div>
+</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const USERS_KEY = 'edukz_users';
+const TEACHERS_KEY = 'edukz_teachers';
+const DATA_KEY = 'edukz_data';
+const SETTINGS_KEY = 'edukz_settings';
+
+function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch(e) { return def; } }
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+let users = load(USERS_KEY, [
+  {id:1, fio:'Сейткали Бекзат Маратұлы', email:'admin@mektep.kz', pass:'Admin2025!', role:'admin', initials:'СБ', roleLabel:'Директор'},
+  {id:2, fio:'Ахметов Берік Сейтқалиұлы', email:'teacher@mektep.kz', pass:'Teacher2025!', role:'teacher', initials:'АБ', roleLabel:'Математика мұғалімі'}
+]);
+
+let teachers = load(TEACHERS_KEY, [
+  {id:1, fio:'Ахметов Берік Сейтқалиұлы', subject:'Математика', category:'Жоғары санат', exp:15, email:'teacher@mektep.kz', hasData:true, score:84.2, level:'Ж'},
+  {id:2, fio:'Сейтова Айгүл Нұрлановна', subject:'Қазақ тілі мен әдебиеті', category:'I санат', exp:11, email:'', hasData:true, score:76.5, level:'Т'},
+  {id:3, fio:'Нұрланов Дәурен Болатұлы', subject:'Физика', category:'Жоғары санат', exp:18, email:'', hasData:true, score:91.0, level:'Ж'},
+  {id:4, fio:'Қасымова Зарина Ержанқызы', subject:'Биология', category:'II санат', exp:6, email:'', hasData:false, score:0, level:'–'},
+  {id:5, fio:'Жақсыбеков Марат Серікұлы', subject:'Тарих', category:'I санат', exp:9, email:'', hasData:true, score:65.3, level:'Т'},
+  {id:6, fio:'Оразова Гүлнар Бейсенқызы', subject:'Химия', category:'Педагог-сарапшы', exp:22, email:'', hasData:true, score:88.7, level:'Ж'},
+  {id:7, fio:'Бекова Сауле Ерланқызы', subject:'Ағылшын тілі', category:'I санат', exp:8, email:'', hasData:false, score:0, level:'–'},
+]);
+
+let settings = load(SETTINGS_KEY, {school:'№1 Жалпы орта мектеп', city:'Алматы қаласы', dir:'Сейткали Бекзат Маратұлы', thrHigh:80, thrMid:60, thrDev:40});
+
+let nextTeacherId = Math.max(...teachers.map(t=>t.id)) + 1;
+let nextUserId = Math.max(...users.map(u=>u.id)) + 1;
+let currentUser = null;
+
+// ── AUTH ──────────────────────────────────────────────
+function setRole(r, el) {
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  if(r==='admin') { document.getElementById('li-u').value='admin@mektep.kz'; document.getElementById('li-p').value='Admin2025!'; }
+  else { document.getElementById('li-u').value='teacher@mektep.kz'; document.getElementById('li-p').value='Teacher2025!'; }
+}
+
+function doLogin() {
+  const u = document.getElementById('li-u').value.trim();
+  const p = document.getElementById('li-p').value.trim();
+  const found = users.find(x => x.email === u && x.pass === p);
+  if (!found) { document.getElementById('li-err').style.display='block'; return; }
+  document.getElementById('li-err').style.display='none';
+  currentUser = found;
+  document.getElementById('sb-av').textContent = found.initials;
+  document.getElementById('sb-name').textContent = found.fio.split(' ').slice(0,2).join(' ');
+  document.getElementById('sb-role').textContent = found.roleLabel;
+  document.getElementById('sb-school').textContent = settings.school;
+
+  const isAdmin = found.role === 'admin';
+  const adminEls = ['ni-teachers','ni-users','ni-settings','add-teacher-btn-wrap','adm-sect'];
+  adminEls.forEach(id => { const el=document.getElementById(id); if(el) el.style.display = isAdmin ? '' : 'none'; });
+  document.getElementById('enter-title').textContent = isAdmin ? 'Деректер енгізу' : 'Менің деректерімді толтыру';
+
+  populateTeacherSel();
+  if (!isAdmin) {
+    const myT = teachers.find(t => t.email === found.email);
+    if (myT) document.getElementById('sel-t').value = myT.id;
+  }
+
+  document.getElementById('scr-login').classList.remove('on');
+  document.getElementById('scr-app').classList.add('on');
+  refreshAll();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('scr-app').classList.remove('on');
+  document.getElementById('scr-login').classList.add('on');
+  nav('pg-dash', document.getElementById('ni-dash'));
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('act'));
+  if(el) el.classList.add('act');
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tabpanel').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  el.classList.add('act');
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function badge(l) {
+  const m = {'Ж':'b-high','Т':'b-mid','Д':'b-dev','ДТ':'b-low','–':'b-pend'};
+  const lbl = {'Ж':'Жоғары','Т':'Тиімді','Д':'Дамушы','ДТ':'ДТ төмен','–':'Деректер жоқ'};
+  return `<span class="badge ${m[l]||'b-pend'}">${lbl[l]||l}</span>`;
+}
+
+function barColor(s) {
+  if(s>=80) return 'var(--green)';
+  if(s>=60) return '#185FA5';
+  if(s>=40) return '#BA7517';
+  return '#E24B4A';
+}
+
+function getLevel(score) {
+  const t = settings;
+  if(score >= t.thrHigh) return 'Ж';
+  if(score >= t.thrMid) return 'Т';
+  if(score >= t.thrDev) return 'Д';
+  return 'ДТ';
+}
+
+function initials(fio) {
+  const p = fio.trim().split(' ');
+  return (p[0]?p[0][0]:'') + (p[1]?p[1][0]:'');
+}
+
+// ── RENDER ────────────────────────────────────────────
+function refreshAll() {
+  renderDash();
+  renderTeachers();
+  renderRating();
+  renderUsers();
+}
+
+function renderDash() {
+  const total = teachers.length;
+  const filled = teachers.filter(t=>t.hasData).length;
+  const high = teachers.filter(t=>t.level==='Ж').length;
+  const scored = teachers.filter(t=>t.hasData);
+  const avg = scored.length ? (scored.reduce((a,t)=>a+t.score,0)/scored.length) : 0;
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-filled').textContent = filled;
+  document.getElementById('st-high').textContent = high;
+  document.getElementById('st-avg').textContent = avg.toFixed(1);
+  document.getElementById('st-pending-hint').textContent = (total-filled) + ' күтілуде';
+  document.getElementById('dash-sub').textContent = settings.school + ' — 2024–2025';
+
+  const recent = [...teachers].filter(t=>t.hasData).sort((a,b)=>b.score-a.score).slice(0,6);
+  document.getElementById('recent-tb').innerHTML = recent.map(t=>`
+    <tr>
+      <td><strong>${t.fio.split(' ').slice(0,2).join(' ')}</strong></td>
+      <td style="font-size:12px;">${t.subject}</td>
+      <td>${badge(t.level)}</td>
+      <td><strong>${t.score.toFixed(1)}</strong></td>
+    </tr>`).join('');
+}
+
+function renderTeachers() {
+  document.getElementById('teachers-tb').innerHTML = teachers.map((t,i)=>`
+    <tr>
+      <td style="color:var(--text2);font-size:12px;">${i+1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue-text);flex-shrink:0;">${initials(t.fio)}</div>
+          <div>
+            <div style="font-weight:600;font-size:13px;">${t.fio}</div>
+            ${t.email ? `<div style="font-size:11px;color:var(--text2);">${t.email}</div>` : ''}
+          </div>
+        </div>
+      </td>
+      <td style="font-size:12px;">${t.subject}</td>
+      <td style="font-size:12px;">${t.category}</td>
+      <td style="font-size:12px;">${t.exp} жыл</td>
+      <td>${t.hasData ? '<span style="color:var(--green);font-size:12px;">✓ Толтырылған</span>' : '<span style="color:#b7860b;font-size:12px;">⏳ Күтілуде</span>'}</td>
+      <td><strong>${t.hasData ? t.score.toFixed(1) : '—'}</strong></td>
+      <td>${badge(t.level)}</td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn sm" onclick="openProfile(${t.id})">👁</button>
+          <button class="btn sm" onclick="editTeacher(${t.id})">✏️</button>
+          ${currentUser&&currentUser.role==='admin' ? `<button class="btn sm danger" onclick="deleteTeacher(${t.id})">🗑</button>` : ''}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderRating() {
+  const sorted = [...teachers].filter(t=>t.hasData).sort((a,b)=>b.score-a.score);
+  const noData = teachers.filter(t=>!t.hasData);
+  const allRows = [...sorted, ...noData];
+  document.getElementById('rating-tb').innerHTML = allRows.map((t,i)=>`
+    <tr>
+      <td style="font-weight:700;color:${i<3&&t.hasData?'var(--green)':'var(--text2)'};">${t.hasData ? i+1 : '—'}</td>
+      <td><strong>${t.fio}</strong></td>
+      <td style="font-size:12px;">${t.subject}</td>
+      <td style="font-size:12px;">${t.category}</td>
+      <td><strong>${t.hasData ? t.score.toFixed(1) : '—'}</strong></td>
+      <td style="width:140px;">
+        ${t.hasData ? `<div class="rbar-wrap"><div class="rbar"><div class="rbar-fill" style="width:${t.score.toFixed(0)}%;background:${barColor(t.score)};"></div></div><span style="font-size:11px;width:30px;">${t.score.toFixed(0)}</span></div>` : '—'}
+      </td>
+      <td>${badge(t.level)}</td>
+      <td><button class="btn sm" onclick="openProfile(${t.id})">Толығырақ</button></td>
+    </tr>`).join('');
+}
+
+function renderUsers() {
+  document.getElementById('users-card').innerHTML = '<div class="card-title">Пайдаланушылар тізімі</div>' +
+    users.map(u=>`
+    <div class="user-row">
+      <div class="u-av2">${u.initials||initials(u.fio)}</div>
+      <div class="u-info">
+        <div class="name">${u.fio}</div>
+        <div class="meta">${u.email} · ${u.role==='admin' ? '🛡 Әкімші' : '👤 Мұғалім'}</div>
+      </div>
+      ${currentUser&&currentUser.role==='admin'&&u.id!==currentUser.id ? `<button class="btn sm danger" onclick="deleteUser(${u.id})">🗑 Жою</button>` : ''}
+    </div>`).join('');
+}
+
+function populateTeacherSel() {
+  const sel = document.getElementById('sel-t');
+  sel.innerHTML = '<option value="">— Мұғалімді таңдаңыз —</option>' +
+    teachers.map(t=>`<option value="${t.id}">${t.fio} (${t.subject})</option>`).join('');
+}
+
+// ── TEACHER CRUD ──────────────────────────────────────
+function openAddTeacher() {
+  document.getElementById('nt-fio').value = '';
+  document.getElementById('nt-email').value = '';
+  document.getElementById('nt-exp').value = '';
+  document.getElementById('nt-pass').value = 'T' + Math.random().toString(36).slice(2,6).toUpperCase() + '@2025';
+  openModal('modal-add-teacher');
+}
+
+function addTeacher() {
+  const fio = document.getElementById('nt-fio').value.trim();
+  if(!fio) { alert('ТАӘ толтырыңыз'); return; }
+  const email = document.getElementById('nt-email').value.trim();
+  const pass = document.getElementById('nt-pass').value.trim();
+  const subj = document.getElementById('nt-subj').value;
+  const cat = document.getElementById('nt-cat').value;
+  const exp = parseInt(document.getElementById('nt-exp').value)||0;
+  const t = {id:nextTeacherId++, fio, subject:subj, category:cat, exp, email, hasData:false, score:0, level:'–'};
+  teachers.push(t);
+  if(email && pass) {
+    users.push({id:nextUserId++, fio, email, pass, role:'teacher', initials:initials(fio), roleLabel:subj+' мұғалімі'});
+    save(USERS_KEY, users);
+  }
+  save(TEACHERS_KEY, teachers);
+  closeModal('modal-add-teacher');
+  populateTeacherSel();
+  refreshAll();
+}
+
+function deleteTeacher(id) {
+  if(!confirm('Мұғалімді жою?')) return;
+  teachers = teachers.filter(t=>t.id!==id);
+  save(TEACHERS_KEY, teachers);
+  populateTeacherSel();
+  refreshAll();
+}
+
+function editTeacher(id) {
+  nav('pg-enter', document.getElementById('ni-enter'));
+  document.getElementById('sel-t').value = id;
+}
+
+// ── USERS CRUD ────────────────────────────────────────
+function openAddUser() {
+  document.getElementById('nu-fio').value = '';
+  document.getElementById('nu-email').value = '';
+  document.getElementById('nu-pass').value = 'User' + Math.random().toString(36).slice(2,6).toUpperCase() + '!';
+  openModal('modal-add-user');
+}
+
+function addUser() {
+  const fio = document.getElementById('nu-fio').value.trim();
+  const email = document.getElementById('nu-email').value.trim();
+  const pass = document.getElementById('nu-pass').value.trim();
+  const role = document.getElementById('nu-role').value;
+  if(!fio||!email||!pass) { alert('Барлық өрістерді толтырыңыз'); return; }
+  users.push({id:nextUserId++, fio, email, pass, role, initials:initials(fio), roleLabel: role==='admin'?'Әкімші':'Мұғалім'});
+  save(USERS_KEY, users);
+  closeModal('modal-add-user');
+  renderUsers();
+}
+
+function deleteUser(id) {
+  if(!confirm('Пайдаланушыны жою?')) return;
+  users = users.filter(u=>u.id!==id);
+  save(USERS_KEY, users);
+  renderUsers();
+}
+
+// ── PROFILE ───────────────────────────────────────────
+function openProfile(id) {
+  const t = teachers.find(x=>x.id===id);
+  if(!t) return;
+  const color = barColor(t.score);
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-av">${initials(t.fio)}</div>
+      <div>
+        <div class="profile-name">${t.fio}</div>
+        <div class="profile-subj">${t.subject} · ${t.category}</div>
+      </div>
+    </div>
+    <table class="kv-table">
+      <tr><td>Педагогикалық өтіл</td><td>${t.exp} жыл</td></tr>
+      <tr><td>Деректер күйі</td><td>${t.hasData ? '✅ Толтырылған' : '⏳ Күтілуде'}</td></tr>
+      <tr><td>Рейтинг балы</td><td>${t.hasData ? t.score.toFixed(1) + ' / 100' : '—'}</td></tr>
+      <tr><td>Деңгей</td><td>${badge(t.level)}</td></tr>
+    </table>
+    ${t.hasData ? `
+    <div style="margin-top:1rem;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Рейтинг прогресі</div>
+      <div style="height:12px;background:var(--bg2);border-radius:6px;overflow:hidden;">
+        <div style="height:100%;width:${t.score.toFixed(0)}%;background:${color};border-radius:6px;transition:width 0.5s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:4px;"><span>0</span><span>${t.score.toFixed(1)}</span><span>100</span></div>
+    </div>` : ''}
+    <div style="margin-top:1rem;">
+      <button class="btn blue" onclick="editTeacher(${t.id});closeModal('modal-profile');">✏️ Деректер енгізу</button>
+    </div>`;
+  openModal('modal-profile');
+}
+
+// ── DATA ENTRY ────────────────────────────────────────
+function saveData() {
+  const c1=document.getElementById('c1').checked;
+  const c2=document.getElementById('c2').checked;
+  const c3=document.getElementById('c3').checked;
+  if(!c1||!c2||!c3) { alert('Академиялық адалдық растауының барлық 3 пунктіне белгі қойыңыз.'); return; }
+  const tid = parseInt(document.getElementById('sel-t').value);
+  if(!tid) { alert('Мұғалімді таңдаңыз'); return; }
+  const t = teachers.find(x=>x.id===tid);
+  if(!t) return;
+
+  const quals = Array.from(document.querySelectorAll('#qual-grid input')).map(i=>parseFloat(i.value)||0).filter(v=>v>0);
+  const avgQual = quals.length ? quals.reduce((a,b)=>a+b,0)/quals.length : 60;
+  const ubt = parseFloat(document.getElementById('ubt').value)||0;
+  const mentor = parseInt(document.getElementById('mentor').value)||0;
+  const art = parseInt(document.getElementById('art').value)||0;
+  const opls = parseInt(document.getElementById('opls').value)||0;
+  const cpd = parseInt(document.getElementById('cpd').value)||0;
+
+  let score = avgQual * 0.45;
+  score += Math.min(20, ubt * 0.14);
+  score += Math.min(10, mentor * 3);
+  score += Math.min(8, art * 1.5);
+  score += Math.min(6, opls * 0.8);
+  score += Math.min(5, (cpd / 72) * 2);
+  score = Math.min(100, Math.max(0, score));
+
+  t.score = Math.round(score * 10) / 10;
+  t.level = getLevel(t.score);
+  t.hasData = true;
+  save(TEACHERS_KEY, teachers);
+
+  const ok = document.getElementById('save-ok');
+  ok.style.display = 'flex';
+  setTimeout(()=>ok.style.display='none', 4000);
+  refreshAll();
+}
+
+function clearForm() {
+  document.querySelectorAll('#pg-enter input[type=number], #pg-enter input[type=text]').forEach(i=>i.value='');
+  document.querySelectorAll('#pg-enter input[type=checkbox]').forEach(c=>c.checked=false);
+  document.getElementById('sel-t').value='';
+}
+
+function addAch(listId, type) {
+  const list = document.getElementById(listId);
+  const d = document.createElement('div');
+  d.className = type==='s' ? 'ach-row s5' : 'ach-row t4';
+  const stuExtra = type==='s' ? `<div class="fg"><label>Оқушы саны</label><input type="number" placeholder="1" min="1"></div>` : '';
+  d.innerHTML = `
+    <div class="fg"><label>Атауы</label><input type="text" placeholder="Конкурс атауы"></div>
+    <div class="fg"><label>Деңгей</label><select>
+      <option value="0.1">Мектеп (0.1)</option><option value="0.3">Аудан/қала (0.3)</option>
+      <option value="0.6">Облыс (0.6)</option><option value="0.9">Республикалық (0.9)</option>
+      <option value="1.0">Халықаралық (1.0)</option>
+    </select></div>
+    ${stuExtra}
+    <div class="fg"><label>Жыл</label><input type="number" placeholder="2024" min="2020" max="2025"></div>
+    <button class="rm-btn" onclick="rmRow(this)">×</button>`;
+  list.appendChild(d);
+}
+
+function rmRow(btn) { btn.closest('.ach-row').remove(); }
+
+// ── SETTINGS ──────────────────────────────────────────
+function saveSettings() {
+  settings.school = document.getElementById('sch-name').value;
+  settings.city = document.getElementById('sch-city').value;
+  settings.dir = document.getElementById('sch-dir').value;
+  settings.thrHigh = parseInt(document.getElementById('thr-high').value)||80;
+  settings.thrMid = parseInt(document.getElementById('thr-mid').value)||60;
+  settings.thrDev = parseInt(document.getElementById('thr-dev').value)||40;
+  save(SETTINGS_KEY, settings);
+  document.getElementById('sb-school').textContent = settings.school;
+  alert('✅ Баптаулар сақталды');
+}
+
+// ── MODALS ────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('on'); });
+});
+</script>
+</body>
+</html>
